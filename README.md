@@ -16,7 +16,7 @@ This project uses TypeScript to provide type checking and documentation.
 -   Adds a plugin setting tab to the settings page.
 -   Uses the Moment API to generate a date string in the specified format
 
-### Configurability
+### Configuration
 -   The name for the daily notes file
 -   Enable Year and/or Month subdirectories in file root location
 -   The template used to create daily note
