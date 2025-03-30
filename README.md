@@ -1,4 +1,4 @@
-# Obsidian Daily Notes Automater
+# Daily Notes Automater
 
 This is an [Obsidian](https://obsidian.md) plugin that extends the configurability and automates the generation of Obsidian daily notes.
 
