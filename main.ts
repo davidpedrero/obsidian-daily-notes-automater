@@ -1,4 +1,4 @@
-import { App, Plugin, PluginSettingTab, Setting, TFile } from "obsidian";
+import { App, Notice, Plugin, PluginSettingTab, Setting, TFile } from "obsidian";
 import { getDateProps, validateNewFilePath } from "utils";
 
 interface MyPluginSettings {
@@ -19,7 +19,7 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 	fileNameSuffix: ""
 };
 
-const PRINT_LOGS: boolean = true;
+const PRINT_LOGS = false;
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
@@ -27,21 +27,12 @@ export default class MyPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-		let {
-			dateFormat,
-			templateFilePath,
-			newFilePath,
-			isYearEnabled,
-			isMonthEnabled,
-			fileNameSuffix
-		} = this.settings;
+		const { dateFormat, isYearEnabled, isMonthEnabled, fileNameSuffix } = this.settings;
+		let { templateFilePath, newFilePath } = this.settings;
 
 		const { year, month, monthIndex, date } = getDateProps(dateFormat, PRINT_LOGS);
 
-		if (templateFilePath === "") {
-			console.log("Please provide a template file location");
-			return;
-		}
+		if (templateFilePath === "") return;
 
 		templateFilePath = `${templateFilePath}.md`;
 
@@ -51,8 +42,11 @@ export default class MyPlugin extends Plugin {
 			isMonthEnabled ? `${monthIndex}. ${month}/` : ""
 		}${date} ${fileNameSuffix}.md`;
 
-		console.log(`templateFilePath:\n${templateFilePath}`);
-		console.log(`newFilePath:\n${newFilePath}`);
+		if (PRINT_LOGS) {
+			console.log(`templateFilePath:\n${templateFilePath}`);
+			console.log(`newFilePath:\n${newFilePath}`);
+		}
+
 
 		this.app.workspace.onLayoutReady(async () => {
 			await this.createDailyNote(newFilePath, templateFilePath);
@@ -63,7 +57,13 @@ export default class MyPlugin extends Plugin {
 	}
 
 	onunload() {
-		console.log("Running onunload method...");
+		if (PRINT_LOGS) {
+			console.log('Unloading plugin');
+		}
+
+		new Notice("Daily Notes Automator plugin unloaded");
+
+		this.app.workspace.off(('layout-change'), this.createDailyNote);
 	}
 
 	async loadSettings() {
@@ -80,13 +80,13 @@ export default class MyPlugin extends Plugin {
 
 	// This creates daily note for today (if it does not already exist)
 	async createDailyNote(newFilePath: string, templateFilePath: string) {
-		console.log("Running createDailyNote function...");
+		if (PRINT_LOGS) console.log("Running createDailyNote()");
 
 		const { vault } = this.app;
 
 		// If Daily Note already exists, terminate plug-in
 		if (vault.getAbstractFileByPath(newFilePath)) {
-			console.log("Daily Note already exists!");
+			if (PRINT_LOGS) console.log("Daily Note already exists!");
 			return;
 		}
 
@@ -95,7 +95,7 @@ export default class MyPlugin extends Plugin {
 
 		// If template file path does not exist or point to a file, terminate plug-in
 		if (!templateFile || !(templateFile instanceof TFile)) {
-			console.log(`Template file not found at:\n${templateFile}`);
+			if (PRINT_LOGS) console.log(`Template file not found at:\n${templateFile}`);
 			return;
 		}
 
@@ -104,11 +104,13 @@ export default class MyPlugin extends Plugin {
 
 		// Validates that all folders in fild path exist
 		// If they do not, we create them before proceeding
-		validateNewFilePath(newFilePath, vault);
+		validateNewFilePath(newFilePath, vault, PRINT_LOGS);
 
 		vault.create(newFilePath, templateContent);
 
-		console.log(`New daily note created at:\n${newFilePath}`);
+		new Notice("Daily note created!");
+
+		if (PRINT_LOGS) console.log(`Daily note created at:\n${newFilePath}`);
 	}
 }
 

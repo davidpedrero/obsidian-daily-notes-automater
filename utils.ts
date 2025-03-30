@@ -1,10 +1,10 @@
 import { moment, Vault } from "obsidian";
 
 export function getDateProps(dateFormat: string, PRINT_LOGS: boolean): {
-	year: String;
-	month: String;
-	monthIndex: String;
-	date: String;
+	year: string;
+	month: string;
+	monthIndex: string;
+	date: string;
 } {
 	const now = new Date();
 
@@ -23,13 +23,14 @@ export function getDateProps(dateFormat: string, PRINT_LOGS: boolean): {
 	return { year, month, monthIndex, date };
 }
 
-export function validateNewFilePath(newFilePath: string, vault: Vault): void {
+export function validateNewFilePath(newFilePath: string, vault: Vault, PRINT_LOGS: boolean): void {
         const folderPathSubstring = newFilePath.substring(0, newFilePath.lastIndexOf("/"));
-        console.log(`folderPathSubstring:\n${folderPathSubstring}`);
+        if (PRINT_LOGS) console.log(`folderPathSubstring:\n${folderPathSubstring}`);
         
         if (!(vault.getAbstractFileByPath(folderPathSubstring))) {
             const folders = folderPathSubstring.split("/");
-            console.log(`folders length: ${folders.length}`);
+
+            if (PRINT_LOGS) console.log(`# of folders: ${folders.length}`);
             
             let currentPath = `${folders[0]}`;
 
@@ -39,6 +40,6 @@ export function validateNewFilePath(newFilePath: string, vault: Vault): void {
             }
         }
 
-        console.log("New file path validation complete!");
+        if (PRINT_LOGS) console.log("File path validation complete!");
 
 }
