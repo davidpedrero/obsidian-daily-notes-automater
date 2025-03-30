@@ -4,8 +4,7 @@
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "Automates the creation of a daily note",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"author": "David Pedrero",
+	"authorUrl": "https://davidpedrero.com/",
 	"isDesktopOnly": false
 }
