@@ -25,6 +25,9 @@ export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
 
 	async onload() {
+		// This adds a settings tab so the user can configure various aspects of the plugin
+		this.addSettingTab(new MyPluginSettingsTab(this.app, this));
+
 		await this.loadSettings();
 
 		const { dateFormat, isYearEnabled, isMonthEnabled, fileNameSuffix } = this.settings;
@@ -32,7 +35,10 @@ export default class MyPlugin extends Plugin {
 
 		const { year, month, monthIndex, date } = getDateProps(dateFormat, PRINT_LOGS);
 
-		if (templateFilePath === "") return;
+		if (templateFilePath === "") {
+			if (PRINT_LOGS) console.log("No template file provided");
+			return;
+		}
 
 		templateFilePath = `${templateFilePath}.md`;
 
@@ -47,19 +53,13 @@ export default class MyPlugin extends Plugin {
 			console.log(`newFilePath:\n${newFilePath}`);
 		}
 
-
 		this.app.workspace.onLayoutReady(async () => {
 			await this.createDailyNote(newFilePath, templateFilePath);
 		});
-
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new MyPluginSettingsTab(this.app, this));
 	}
 
 	onunload() {
-		if (PRINT_LOGS) {
-			console.log('Unloading plugin');
-		}
+		if (PRINT_LOGS) console.log('Unloading plugin');
 
 		new Notice("Daily Notes Automator plugin unloaded");
 
