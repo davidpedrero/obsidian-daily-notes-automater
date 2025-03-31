@@ -1,7 +1,7 @@
 import { App, Notice, Plugin, PluginSettingTab, Setting, TFile } from "obsidian";
 import { getDateProps, validateNewFilePath } from "utils";
 
-interface MyPluginSettings {
+interface DailyNotesAutomaterSettings {
 	dateFormat: string;
 	templateFilePath: string;
 	newFilePath: string;
@@ -10,7 +10,7 @@ interface MyPluginSettings {
 	fileNameSuffix: string;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
+const DEFAULT_SETTINGS: DailyNotesAutomaterSettings = {
 	dateFormat: "MM-DD-YYYY",
 	templateFilePath: "",
 	newFilePath: "",
@@ -21,12 +21,12 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 
 const PRINT_LOGS = false;
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class DailyNotesAutomaterPlugin extends Plugin {
+	settings: DailyNotesAutomaterSettings;
 
 	async onload() {
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new MyPluginSettingsTab(this.app, this));
+		this.addSettingTab(new DailyNotesAutomaterSettingsTab(this.app, this));
 
 		await this.loadSettings();
 
@@ -114,10 +114,10 @@ export default class MyPlugin extends Plugin {
 	}
 }
 
-class MyPluginSettingsTab extends PluginSettingTab {
-	plugin: MyPlugin;
+class DailyNotesAutomaterSettingsTab extends PluginSettingTab {
+	plugin: DailyNotesAutomaterPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: DailyNotesAutomaterPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
