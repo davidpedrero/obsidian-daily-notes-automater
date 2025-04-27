@@ -19,8 +19,6 @@ const DEFAULT_SETTINGS: DailyNotesAutomaterSettings = {
 	fileNameSuffix: ""
 };
 
-const PRINT_LOGS = false;
-
 export default class DailyNotesAutomaterPlugin extends Plugin {
 	settings: DailyNotesAutomaterSettings;
 
@@ -33,12 +31,9 @@ export default class DailyNotesAutomaterPlugin extends Plugin {
 		const { dateFormat, isYearEnabled, isMonthEnabled, fileNameSuffix } = this.settings;
 		let { templateFilePath, newFilePath } = this.settings;
 
-		const { year, month, monthIndex, date } = getDateProps(dateFormat, PRINT_LOGS);
+		const { year, month, monthIndex, date } = getDateProps(dateFormat);
 
-		if (templateFilePath === "") {
-			if (PRINT_LOGS) console.log("No template file provided");
-			return;
-		}
+		if (templateFilePath === "") return;
 
 		templateFilePath = `${templateFilePath}.md`;
 
@@ -48,22 +43,13 @@ export default class DailyNotesAutomaterPlugin extends Plugin {
 			isMonthEnabled ? `${monthIndex}. ${month}/` : ""
 		}${date} ${fileNameSuffix}.md`;
 
-		if (PRINT_LOGS) {
-			console.log(`templateFilePath:\n${templateFilePath}`);
-			console.log(`newFilePath:\n${newFilePath}`);
-		}
-
 		this.app.workspace.onLayoutReady(async () => {
 			await this.createDailyNote(newFilePath, templateFilePath);
 		});
 	}
 
 	onunload() {
-		if (PRINT_LOGS) console.log('Unloading plugin');
-
 		new Notice("Daily Notes Automator plugin unloaded");
-
-		this.app.workspace.off(('layout-change'), this.createDailyNote);
 	}
 
 	async loadSettings() {
@@ -80,37 +66,27 @@ export default class DailyNotesAutomaterPlugin extends Plugin {
 
 	// This creates daily note for today (if it does not already exist)
 	async createDailyNote(newFilePath: string, templateFilePath: string) {
-		if (PRINT_LOGS) console.log("Running createDailyNote()");
-
 		const { vault } = this.app;
 
 		// If Daily Note already exists, terminate plug-in
-		if (vault.getAbstractFileByPath(newFilePath)) {
-			if (PRINT_LOGS) console.log("Daily Note already exists!");
-			return;
-		}
+		if (vault.getAbstractFileByPath(newFilePath)) return;
 
 		// Validates template file path
 		const templateFile = vault.getAbstractFileByPath(templateFilePath);
 
 		// If template file path does not exist or point to a file, terminate plug-in
-		if (!templateFile || !(templateFile instanceof TFile)) {
-			if (PRINT_LOGS) console.log(`Template file not found at:\n${templateFile}`);
-			return;
-		}
+		if (!templateFile || !(templateFile instanceof TFile)) return;
 
 		// Get template file contents
 		const templateContent = await vault.read(templateFile);
 
 		// Validates that all folders in fild path exist
 		// If they do not, we create them before proceeding
-		validateNewFilePath(newFilePath, vault, PRINT_LOGS);
+		validateNewFilePath(newFilePath, vault);
 
 		vault.create(newFilePath, templateContent);
 
 		new Notice("Daily note created!");
-
-		if (PRINT_LOGS) console.log(`Daily note created at:\n${newFilePath}`);
 	}
 }
 
@@ -128,7 +104,7 @@ class DailyNotesAutomaterSettingsTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName("Date Format")
+			.setName("Date format")
 			.setDesc("Output format for parsed dates")
 			.addMomentFormat((format) => {
 				format
@@ -141,7 +117,7 @@ class DailyNotesAutomaterSettingsTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Template File Location")
+			.setName("Template file location")
 			.setDesc("Choose the file to use as template")
 			.addText((text) => {
 				text.setPlaceholder("")
@@ -153,7 +129,7 @@ class DailyNotesAutomaterSettingsTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("New File Location")
+			.setName("New file location")
 			.setDesc("Choose root folder to store new daily notes")
 			.addText((text) => {
 				text.setPlaceholder("")
@@ -165,8 +141,8 @@ class DailyNotesAutomaterSettingsTab extends PluginSettingTab {
 			});
 			
 			new Setting(containerEl)
-			.setName("Enable Year Subdirectory")
-			.setDesc("Add Year to new file location path")
+			.setName("Enable year subdirectory")
+			.setDesc("Add year to new file location path")
 			.addToggle((toggle) => {
 				toggle
 					.setValue(this.plugin.settings.isYearEnabled)
@@ -177,7 +153,7 @@ class DailyNotesAutomaterSettingsTab extends PluginSettingTab {
 				});
 				
 				new Setting(containerEl)
-				.setName("Enable Month Subdirectory")
+				.setName("Enable month subdirectory")
 				.setDesc("Add month to new file location path")
 				.addToggle((toggle) => {
 					toggle
@@ -189,7 +165,7 @@ class DailyNotesAutomaterSettingsTab extends PluginSettingTab {
 				});
 
 				new Setting(containerEl)
-					.setName("File Name Suffix")
+					.setName("File name suffix")
 					.setDesc("Add a suffix to daily notes file name")
 					.addText((text) => {
 						text.setPlaceholder("")
